@@ -9,7 +9,7 @@ const count = ref(0)
 </script>
 
 <template>
-  <div></div>
+  <div>lol</div>
 </template>
 
 <style scoped>
