@@ -7,26 +7,30 @@ export default defineConfig({
     vue(),
     viteStaticCopy({
       targets: [
-        {
-          src: 'public/assets/icons/*', // The correct path to icons in the `public` folder
-          dest: 'assets/icons', // Where they should go in the build output
-        },
-      ],
-    }),
+        { src: 'manifest.json', dest: '' },
+        { src: 'public/assets/icons', dest: 'assets' }
+      ]
+    })
   ],
+  css: {
+    postcss: './postcss.config.js' 
+  },
   build: {
-    outDir: 'dist', // Build output directory
+    outDir: 'dist',
     rollupOptions: {
       input: {
-        popup: 'public/PopUp.html',
+        popup: 'src/popup.html',  
+        content: 'src/content.js'
       },
       output: {
-        dir: 'dist', // Output directory for the build files
-        entryFileNames: '[name].js', // Keep original file names
-      },
-    },
-  },
+        entryFileNames: '[name].js'
+      }
+    }
+  }
 });
+
+
+
 
 
 

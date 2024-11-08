@@ -1,8 +1,9 @@
 
 <template>
     <div class="p-4">
-      <h1 class="text-xl font-bold text-center">Crypto Extension</h1>
-      <button @click="fetchCryptoData" class="mt-4 bg-blue-500 text-white py-2 px-4 rounded">
+      <h1 class="text-xl font-bold bg-purple-800">Coiner</h1>
+      <button @click="fetchCryptoData"
+              class="mt-4 bg-purple-500 text-white py-2 px-4 rounded">
         Fetch Crypto Data
       </button>
       <div v-if="cryptoData" class="mt-4">
@@ -15,6 +16,8 @@
   import { ref } from 'vue';
   
   export default {
+    name: 'popUpApp',
+
     setup() {
       const cryptoData = ref(null);
   
