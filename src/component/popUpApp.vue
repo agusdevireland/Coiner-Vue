@@ -1,37 +1,72 @@
-
 <template>
-    <div class="p-4">
-      <h1 class="text-xl font-bold bg-purple-800">Coiner</h1>
-      <button @click="fetchCryptoData"
-              class="mt-4 bg-purple-500 text-white py-2 px-4 rounded">
-        Fetch Crypto Data
-      </button>
-      <div v-if="cryptoData" class="mt-4">
-        <p>Bitcoin Price: ${{ cryptoData.bitcoin.usd }}</p>
-      </div>
-    </div>
-  </template>
-  
-  <script>
-  import { ref } from 'vue';
-  
-  export default {
-    name: 'popUpApp',
 
-    setup() {
-      const cryptoData = ref(null);
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anta&display=swap" rel="stylesheet">
   
-      async function fetchCryptoData() {
-        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
-        cryptoData.value = await response.json();
+  <div class="navbar flex justify-start py-4 px-36">
+    <h1 class="text-3xl text-white anta-font">Coiner</h1>
+    <div class="flex justify-between gap-4">
+      <button class="button p-2 rounded-lg shadow-xl">
+      </button>
+      <button class="button p-2 rounded-lg shadow-xl">
+      </button>
+    </div>
+  </div>
+
+  <div class="flex justify-center py-2 gap-x-16">
+    <p class="text-below-navbar font-bold">Coin</p>
+    <p class="text-below-navbar font-bold">Price</p>
+    <p class="text-below-navbar font-bold">Market Cap</p>
+  </div>
+
+  <div class="p p-40">
+  </div>
+
+</template>
+
+<script>
+
+export default {
+  name: 'popUpApp',
+  data() {
+    return {
+     
       }
-  
-      return { cryptoData, fetchCryptoData };
-    },
-  };
-  </script>
-  
-  <style scoped>
-  /* Additional styles */
-  </style>
-  
+    }
+  }
+</script>
+
+<style lang="css" scoped>
+
+.navbar {
+  background-color: #AE009D;
+}
+
+.button {
+  background-color: #D9D9D9;
+}
+
+.button:hover {
+  background-color: #c4c4c4; 
+}
+
+.button:active {
+  background-color: #D9D9D9;
+}
+
+.anta-font{
+  font-family: "Anta", sans-serif;
+  font-weight: 400;
+  font-style: bold;
+}
+
+.text-below-navbar{
+  color: #AE009D;
+}
+
+.p{
+  background-color: #D9D9D9;
+}
+
+</style>
