@@ -14,7 +14,7 @@
     <div class="relative" ref="settingsDropdown">
     <button class="button py-1 px-2 rounded-lg shadow-xl" 
             @click="toggleDropdown('settings')">
-      <i class="mdi mdi-eye-plus custom-icon"></i> 
+      <i class="mdi mdi-bell-cog-outline custom-icon"></i> 
     </button>
     <div v-if="isSettingsDropdownOpen" class="dropdown-menu">
           <ul>
@@ -28,7 +28,7 @@
     <div class="relative" ref="cryptoDropdown">
     <button class="button py-1 px-2 rounded-lg shadow-xl"
             @click="toggleDropdown('crypto')">
-      <i class="mdi mdi-bell-cog-outline custom-icon"></i> 
+      <i class="mdi mdi-eye-plus custom-icon"></i> 
     </button>
     <div v-if="isCryptoDropdownOpen" class="dropdown-menu">
           <ul>
@@ -54,8 +54,31 @@
     <p class="text-below-navbar font-bold">Market Cap</p>
   </div>
 
-  <div class="p px-10 py-20">
+  <div class="p px-10 py-20 flex justify-center">
+
+   <div class="selected-cryptos flex flex-col">
+  <div 
+       v-for="crypto in selectedCryptos" 
+       :key="crypto.id" 
+       class="crypto-block"
+       >
+<img :src="crypto.image" alt="Crypto Logo" class="crypto-logo" />
+ <div class="flex justify-around items-start gap-x-4 bg-white rounded-lg px-4">
+  <p class="crypto-name">{{ crypto.name }}</p>
+    <p 
+      :class="{
+                'price-up': crypto.priceStatus === 'up', 
+                'price-down': crypto.priceStatus === 'down',
+                'price-fluctuating': true // Always apply the fluctuation animation
+     }"
+    >
+     €{{ crypto.current_price }}
+  </p>
+     <p class="crypto-market-cap">€{{ crypto.market_cap.toLocaleString() }}</p>
+   </div>
   </div>
+ </div>
+</div>
 
 </template>
 
@@ -73,6 +96,9 @@ export default {
       cryptos: [], // Store all cryptos
       filteredCryptos: [], // Filtered list based on input
       debounceTimeout: null, // Timer to debounce API requests
+      selectedCryptos: [], // Stores selected cryptocurrencies
+      previousPrices: {}, // Stores previous prices to track changes
+
     };
   },
   methods: {
@@ -159,21 +185,73 @@ export default {
     }
    },
    
-    selectCrypto(crypto) {
-      this.cryptoInput = `${crypto.name} (${crypto.symbol.toUpperCase()})`; // Set input to selected crypto
-      this.isCryptoDropdownOpen = false; // Close dropdown after selection
-    }
-  },
+   async updateCryptoPrices() {
+  try {
+    console.log("Fetching latest prices...");
+    const response = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=eur`);
+    const data = await response.json();
 
+    console.log("API response:", data);
+
+    this.selectedCryptos = this.selectedCryptos.map((crypto) => {
+      const updatedCrypto = data.find((item) => item.id === crypto.id);
+
+      if (updatedCrypto) {
+        const previousPrice = this.previousPrices[crypto.id] || crypto.current_price;
+        const priceStatus = updatedCrypto.current_price > previousPrice ? 'up' : 
+                            updatedCrypto.current_price < previousPrice ? 'down' : null;
+
+        // Log the price update for debugging
+        console.log(`Updating ${crypto.name}: ${previousPrice} -> ${updatedCrypto.current_price} (${priceStatus})`);
+
+        // Store the updated price for comparison in the next cycle
+        this.previousPrices[crypto.id] = updatedCrypto.current_price;
+
+        return {
+          ...crypto,
+          current_price: updatedCrypto.current_price,
+          priceStatus,
+        };
+      }
+
+      return crypto; // Return unchanged if not found
+    });
+  } catch (error) {
+    console.error("Error updating crypto prices:", error);
+  }
+},
+
+
+
+
+selectCrypto(crypto) {
+  const exists = this.selectedCryptos.some((item) => item.id === crypto.id);
+  if (!exists) {
+    this.selectedCryptos.push({
+      ...crypto,
+      priceStatus: null, // Initialize without a status
+    });
+    this.previousPrices[crypto.id] = crypto.current_price; // Track the initial price
+  }
+
+  // Reset input and dropdown
+  this.cryptoInput = ""; 
+  this.filteredCryptos = []; 
+  this.isCryptoDropdownOpen = false; 
+},
+
+  
   mounted() {
     // Listen for clicks on the entire document
     document.addEventListener('click', this.handleClickOutside);
-  },
-
+    this.priceUpdateInterval = setInterval(this.updateCryptoPrices, 100); // Update every 10 seconds for testing
+   },
   beforeDestroy() {
     // Remove the listener when the component is destroyed
     document.removeEventListener('click', this.handleClickOutside);
+    clearInterval(this.priceUpdateInterval);
   }
+ }
 };
 
 </script>
@@ -277,6 +355,69 @@ export default {
   height: 18px;
   border-radius: 50%; 
   display: inline-block; 
+}
+
+/* Block for displaying crypto information */
+.selected-cryptos {
+  display: flex;
+  flex-wrap: wrap; /* Allows multiple blocks to wrap */
+  gap: 16px; /* Space between blocks */
+}
+
+.crypto-block {
+  background-color: #D9D9D9;
+  border: 0.5px solid #ffffff;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex; /* Use flexbox for alignment */
+  align-items: center; /* Vertically align items */
+  justify-content: space-between; /* Ensure even spacing */
+  width: 400px; /* Set fixed width for uniformity */
+  box-shadow: 0 8px 4px rgba(0, 0, 0, 0.1);
+}
+
+.crypto-logo {
+  width: 40px;
+  height: 40px;
+  margin-right: 16px;
+  border-radius: 50%; /* Circular logo */
+  border: 2px solid #ffffff;
+}
+
+.crypto-name {
+  font-weight: bold;
+  font-size: 16px;/* Add spacing between name and value */
+}
+
+.crypto-value,
+.crypto-market-cap {
+  font-size: 16px;
+  color: #555;
+}
+
+.price-up {
+  color: green;
+  font-weight: bold;
+  transition: color 0.5s ease, transform 0.5s ease;
+  transform: scale(1.1); /* Slightly enlarge on increase */
+}
+
+.price-down {
+  color: red;
+  font-weight: bold;
+  transition: color 0.5s ease, transform 0.5s ease;
+  transform: scale(0.9); /* Slightly shrink on decrease */
+}
+
+.price-fluctuating {
+  animation: fade-in-out 1s ease;
+}
+
+/* Keyframes for the fade-in-out effect */
+@keyframes fade-in-out {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
 }
 
 </style>
