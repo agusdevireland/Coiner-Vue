@@ -63,9 +63,10 @@
        class="crypto-block"
        >
 <img :src="crypto.image" alt="Crypto Logo" class="crypto-logo" />
- <div class="flex justify-around items-start gap-x-4 bg-white rounded-lg px-4">
+ <div class="flex justify-center gap-x-4">
   <p class="crypto-name">{{ crypto.name }}</p>
-    <p 
+    <p
+      class="crypto-value"
       :class="{
                 'price-up': crypto.priceStatus === 'up', 
                 'price-down': crypto.priceStatus === 'down',
@@ -186,7 +187,7 @@ export default {
    },
    
    async updateCryptoPrices() {
-  try {
+    try {
     console.log("Fetching latest prices...");
     const response = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=eur`);
     const data = await response.json();
@@ -221,9 +222,6 @@ export default {
   }
 },
 
-
-
-
 selectCrypto(crypto) {
   const exists = this.selectedCryptos.some((item) => item.id === crypto.id);
   if (!exists) {
@@ -240,13 +238,12 @@ selectCrypto(crypto) {
   this.isCryptoDropdownOpen = false; 
 },
 
-  
-  mounted() {
+mounted() {
     // Listen for clicks on the entire document
     document.addEventListener('click', this.handleClickOutside);
     this.priceUpdateInterval = setInterval(this.updateCryptoPrices, 100); // Update every 10 seconds for testing
    },
-  beforeDestroy() {
+beforeDestroy() {
     // Remove the listener when the component is destroyed
     document.removeEventListener('click', this.handleClickOutside);
     clearInterval(this.priceUpdateInterval);
@@ -370,8 +367,7 @@ selectCrypto(crypto) {
   border-radius: 8px;
   padding: 16px;
   display: flex; /* Use flexbox for alignment */
-  align-items: center; /* Vertically align items */
-  justify-content: space-between; /* Ensure even spacing */
+  align-items: center; /* Vertically align items */ 
   width: 400px; /* Set fixed width for uniformity */
   box-shadow: 0 8px 4px rgba(0, 0, 0, 0.1);
 }
@@ -379,19 +375,19 @@ selectCrypto(crypto) {
 .crypto-logo {
   width: 40px;
   height: 40px;
-  margin-right: 16px;
   border-radius: 50%; /* Circular logo */
   border: 2px solid #ffffff;
 }
 
 .crypto-name {
   font-weight: bold;
-  font-size: 16px;/* Add spacing between name and value */
+  font-size: 15px;/* Add spacing between name and value */
+  margin-left: 25px;
 }
 
 .crypto-value,
 .crypto-market-cap {
-  font-size: 16px;
+  font-size: 15px;
   color: #555;
 }
 
